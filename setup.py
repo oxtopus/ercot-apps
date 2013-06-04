@@ -1,14 +1,10 @@
 from setuptools import setup
 
-version = {}
-execfile('ercot/__version__.py', {}, version)
-
 requirements = map(str.strip, open('requirements.txt').readlines())
 
 setup(
-  name = 'ercot',
-  version = version['__version__'],
-  description = "ERCOT Scraper",
+  name = 'ercot.apps',
+  description = "ERCOT Scraper Sample Apps",
   classifiers = \
     [
       'Intended Audience :: Developers',
@@ -20,14 +16,20 @@ setup(
   keywords = 'ercot',
   author = 'Austin Marshall',
   author_email = 'oxtopus@gmail.com',
-  url = 'https://github.com/oxtopus/ercot',
+  url = 'https://github.com/oxtopus/ercot.apps',
   license = 'MIT',
   namespace_packages = ['ercot'],
-  package_dir = \
+  packages = ['ercot', 'ercot.apps'],
+  entry_points = \
     {
-      'ercot': 'ercot'
+      'console_scripts': \
+        [
+          'system_wide_demand = ercot.apps.system_wide_demand:system_wide_demand'
+        ]
     },
-  packages = ['ercot'],
   requires = requirements,
-  install_requires = requirements
+  install_requires = requirements,
+  dependency_links = [
+        "https://github.com/oxtopus/ercot/archive/0.0.3.tar.gz#egg=ercot-0.0.3"
+    ]
 )
