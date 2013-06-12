@@ -38,31 +38,31 @@ class ErcotStreamSpec(grokpy.StreamSpecification):
 
   @staticmethod
   def formatRecord(record):
-    return (
+    return [
       str(datetime.strptime(
         record.DeliveryDate + ' ' + record.TimeEnding, '%m/%d/%Y %H:%M')),
       record.Demand
-    )
+    ]
 
 
 class ErcotModelSpec(grokpy.ModelSpecification):
-  def __init__(self, name, stream, 
-      predictedField='demand', 
+  def __init__(self, name, stream,
+      predictedField='demand',
       predictionSteps=None):
-    
+
     super(ErcotModelSpec, self).__init__()
-    
+
     self.setName(name)
     self.setPredictedField('demand')
     self.setStream(stream.id)
-    
+
     if predictionSteps is not None:
       self.setPredictionSteps(predictionSteps)
 
 
 def system_wide_demand():
   """ Main entry point. """
-  
+
   cli = core.getCLIParser()
 
   (options, args) = cli.parse_args()
@@ -73,7 +73,7 @@ def system_wide_demand():
     return
 
   name = target + ' ' + datetime.now().isoformat().partition('.')[0]
-  
+
   """ Grok client """
   try:
     grok = grokpy.Client(key=options.apiKey, baseURL=options.apiUrl)
@@ -83,8 +83,8 @@ def system_wide_demand():
         (options.apiKey or os.environ['GROK_API_KEY']), ")"
     elif 'GROK_API_KEY' not in os.environ:
       print "ERROR: Perhaps you did not specify an API Key?\n"
-    
-    cli.print_help()  
+
+    cli.print_help()
     return
 
   """ Create project """
@@ -93,7 +93,7 @@ def system_wide_demand():
   print project.name, 'project created (', project.id, ')'
 
   """ Create stream """
-  streamSpec = ErcotStreamSpec(name)  
+  streamSpec = ErcotStreamSpec(name)
   ercotStream = project.createStream(streamSpec)
 
   print ercotStream.name, 'stream created (', ercotStream.id, ')'
@@ -102,7 +102,7 @@ def system_wide_demand():
 
   print 'Appending historical data to stream...',
 
-  ercotStream.addRecords(map(ErcotStreamSpec.formatRecord, 
+  ercotStream.addRecords(map(ErcotStreamSpec.formatRecord,
     sorted(core.collect(target))))
 
   print 'Done.'
@@ -127,7 +127,7 @@ def system_wide_demand():
 
   for model in models:
     model.startSwarm()
-  
+
   """ Monitor swarms """
   pending = set(models)
   print "Swarming",
@@ -136,7 +136,7 @@ def system_wide_demand():
     for model in pending:
       if ercotModel.getSwarmState()['status'] == grokpy.SwarmStatus.COMPLETED:
         completed.add(model)
-    
+
     for model in completed:
         pending.remove(model)
     print ".",
